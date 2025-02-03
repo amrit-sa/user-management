@@ -1,3 +1,4 @@
+import { body, validationResult } from "express-validator";
 import { User } from "../models/User";
 import { UserRepository } from "../models/UserRepository";
 import { Request, Response } from "express";
@@ -12,6 +13,15 @@ export class UserController{
     async createUser(req: Request, res: Response): Promise<void>{
         try{
             const {name, email, password} = req.body;
+            await body('name').isString().notEmpty().run(req);
+            await body('email').isEmail().run(req);
+            await body('password').isLength({ min: 6 }).run(req);
+            
+            const errors = validationResult(req);
+            if(!errors.isEmpty()){
+                res.status(400).json({ errors: errors.array() });
+                return;
+            }
             const user = new User(0, name, email, password);
             await userRepository.create(user);
             res.status(201).json({
