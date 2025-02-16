@@ -32,4 +32,19 @@ export class UserRepository {
     }
 
 
+    async findByField(fieldName: string, fieldValue: string | number | boolean): Promise<User> {
+        try {
+            const query = `SELECT * from users where ${fieldName} = ?`;
+            const [rows] = await this.db.execute(query, [fieldValue]);
+            if (Array.isArray(rows) && rows.length === 0) {
+                throw new Error(`No user found with ${fieldName}: ${fieldValue}`);
+            }
+            const user = (rows as any[])[0];
+            return user;
+        } catch (error) {
+            console.error("Error finding user:", error);
+            throw error;
+        }
+    }
+
 }

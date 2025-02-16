@@ -2,8 +2,9 @@ import { body, validationResult } from "express-validator";
 import { User } from "../models/User";
 import { UserRepository } from "../models/UserRepository";
 import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 
-const userRepository = new UserRepository();
+export const userRepository = new UserRepository();
 
 export class UserController{
     // constructor(
@@ -16,18 +17,19 @@ export class UserController{
             await body('name').isString().notEmpty().run(req);
             await body('email').isEmail().run(req);
             await body('password').isLength({ min: 6 }).run(req);
-            
+            const hashedPassword = await bcrypt.hash(password, 10);
+
             const errors = validationResult(req);
             if(!errors.isEmpty()){
                 res.status(400).json({ errors: errors.array() });
                 return;
             }
-            const user = new User(0, name, email, password);
+            const user = new User(0, name, email, hashedPassword);
             await userRepository.create(user);
             res.status(201).json({
                 code: 200,
                 message: "User created",
-                data: user
+                data: {name,email}
             })
         }catch(error: any){
             res.status(400).json({

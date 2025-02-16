@@ -1,5 +1,5 @@
 import express from 'express';
-import userRouter from './routes/userRoutes';
+import userRouter from './routes';
 import bodyParser from 'body-parser';
 import Database from './config/db';
 
